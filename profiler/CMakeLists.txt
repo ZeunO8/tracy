@@ -6,6 +6,7 @@ option(LEGACY "Instead of Wayland, use the legacy X11 backend on Linux" OFF)
 option(NO_ISA_EXTENSIONS "Disable ISA extensions (don't pass -march=native or -mcpu=native to the compiler)" OFF)
 option(NO_STATISTICS "Disable calculation of statistics" OFF)
 option(SELF_PROFILE "Enable self-profiling" OFF)
+option(TRACY_INSTALL "Whether to install Tracy" ON)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/version.cmake)
 
@@ -214,4 +215,6 @@ if(EMSCRIPTEN)
     file(COPY_FILE ${CMAKE_CURRENT_LIST_DIR}/../icon/icon.svg ${CMAKE_CURRENT_BINARY_DIR}/favicon.svg)
 endif()
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+if(TRACY_INSTALL)
+    install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()

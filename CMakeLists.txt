@@ -16,6 +16,7 @@ endif()
 option(TRACY_STATIC "Whether to build Tracy as a static library" ${DEFAULT_STATIC})
 option(TRACY_Fortran "Build Fortran bindings" OFF)
 option(TRACY_LTO "Enable Link-Time optimization" OFF)
+option(TRACY_INSTALL "Whether to install Tracy" ON)
 
 if(TRACY_Fortran)
   enable_language(Fortran)
@@ -210,19 +211,21 @@ set(common_includes
     ${TRACY_PUBLIC_DIR}/common/TracyUwp.hpp
     ${TRACY_PUBLIC_DIR}/common/TracyYield.hpp)
 
-install(TARGETS TracyClient
-        EXPORT TracyConfig
-        RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT lib)
-if(TRACY_Fortran)
-    install(TARGETS TracyClientF90
+if(TRACY_INSTALL)
+    install(TARGETS TracyClient
             EXPORT TracyConfig
             RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
             LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
             COMPONENT lib)
+    if(TRACY_Fortran)
+        install(TARGETS TracyClientF90
+                EXPORT TracyConfig
+                RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
+                LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                COMPONENT lib)
+    endif()
 endif()
 # Export targets to build tree root
 export(TARGETS TracyClient
@@ -234,19 +237,21 @@ if(TRACY_Fortran)
            APPEND
            FILE ${CMAKE_BINARY_DIR}/TracyTargets.cmake)
 endif()
-install(FILES ${tracy_includes}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy/tracy)
-install(FILES ${client_includes}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy/client)
-install(FILES ${common_includes}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy/common)
-if(TRACY_Fortran)
-    if(${CMAKE_Fortran_COMPILER_ID} MATCHES "Cray")
-        install(FILES ${PROJECT_BINARY_DIR}/TRACY.mod
-                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy)
-    else()
-        install(FILES ${PROJECT_BINARY_DIR}/tracy.mod
-                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy)
+if(TRACY_INSTALL)
+    install(FILES ${tracy_includes}
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy/tracy)
+    install(FILES ${client_includes}
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy/client)
+    install(FILES ${common_includes}
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy/common)
+    if(TRACY_Fortran)
+        if(${CMAKE_Fortran_COMPILER_ID} MATCHES "Cray")
+            install(FILES ${PROJECT_BINARY_DIR}/TRACY.mod
+                    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy)
+        else()
+            install(FILES ${PROJECT_BINARY_DIR}/tracy.mod
+                    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy)
+        endif()
     endif()
 endif()
 install(EXPORT TracyConfig
@@ -257,8 +262,10 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
         "${CMAKE_CURRENT_BINARY_DIR}/TracyConfig.cmake"
         INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/TracyConfig.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+if(TRACY_INSTALL)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/TracyConfig.cmake
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+endif()
 
 option(TRACY_CLIENT_PYTHON "Whether to build Tracy python client library" OFF)
 

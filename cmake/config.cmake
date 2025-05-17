@@ -16,7 +16,12 @@ if (NOT NO_ISA_EXTENSIONS)
     endif()
 endif()
 
-option(USE_WAYLAND "Whether to use Wayland windower" (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT LEGACY))
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT LEGACY)
+    set(_USE_WAYLAND ON)
+else()
+    set(_USE_WAYLAND OFF)
+endif()
+option(USE_WAYLAND "Whether to use Wayland windower" ${_USE_WAYLAND})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
